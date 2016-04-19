@@ -1,0 +1,247 @@
+---
+title: "Web Scraping in R with<br/>Applications to Fantasy Baseball"
+author: "Andrew Borgman"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output:
+  ioslides_presentation:
+    widescreen: true
+    transition: faster
+    self_contained: false
+---
+
+
+```{r config, include=FALSE}
+library(knitr)
+library(rvest)
+library(humanparser)
+opts_chunk$set(message = FALSE, warning = FALSE)
+```
+
+
+## Overview
+
+- Why web scraping?
+- Web scraping in `R`
+- Use case: Fantasy Baseball Analytics
+
+
+# Why web scraping?
+
+
+## All starts with an idea...
+
+<div align = "center">
+ <img src = "idea.gif" width = "750" height = "500">
+</div>
+
+
+## So you search for some data
+
+<div align = "center">
+ <img src = "Data-search.jpg" width = "750" height = "500">
+</div>
+
+
+## And you (almost) never find this...
+
+<div align = "center">
+ <img src = "heaven.png" width = "750" height = "500">
+</div>
+
+
+## If you're lucky...
+
+- Someone has done the hard work for you
+- Data is available in aggregated format (text file, DB, etc.)
+- Or can be accessed via a standardized API
+
+
+## But what if you aren't lucky?
+
+<div align = "center">
+ <img src = "web-scraping-services.png" width = "750" >
+</div>
+
+
+# Web scraping in `R`
+
+## Many approaches, we'll use `rvest` 
+
+<div align = "center">
+ <img src = "rvest.png" width = "750">
+</div>
+
+
+## Dummy Example
+
+```{r}
+library(rvest)
+
+# Store web url
+lego_movie <- read_html("http://www.imdb.com/title/tt1490017/")
+
+#Scrape the website for the movie rating
+rating <- lego_movie %>% 
+  html_nodes("strong span") %>%
+  html_text() %>%
+  as.numeric()
+rating
+```
+
+## Chrome Developer Tools - Your New Best Friend
+
+This is how to figure out what to put in `html_nodes`!
+
+<div align = "center">
+ <img src = "selector.png" width = "750" >
+</div>
+
+
+## Dummy Example - Continued
+
+```{r}
+# Scrape the website for the cast
+cast <- lego_movie %>%
+  html_nodes("#titleCast > table") %>%
+  html_table()
+cast
+```
+
+
+# Use case: Fantasy Baseball
+
+
+## What is Fantasy Baseball?
+
+- 10 teams draft 26 MLB players to create teams 
+    - each player can only be on 1 team
+- teams compete against one another in head-to-head match-ups each week
+- scores are determined based on players performances in different statistical categories during that week
+
+<div align = "center">
+ <img src = "scores.png" width = "900" >
+</div>
+
+
+## What is Fantasy Baseball?
+
+- 10 teams draft 26 MLB players to create teams (player can only be on 1 team)
+- teams compete against one another in head-to-head match-ups each week
+- scores are determined based on players performances in different statistical categories during that week
+
+<div align = "center">
+ <img src = "scores.png" width = "900" >
+</div>
+
+
+<font size="16" color="red">Question: How can we use `R` to help us win our league!?</font>
+
+
+## Fantasy Baseball Analytics
+
+- With analytics, of course!
+- Scrape multiple statistical projections for each player
+- **Goal:** Compute value for each player *while accounting for variability in projections*
+
+<div align = "center">
+ <img src = "raw-stats.png" height = "355" >
+</div>
+
+## Estimating Value - Z-Score Approach
+
+Step 1: Compute z-scores of statistics for all players
+
+<div align = "center">
+ <img src = "z-scores.png" height = "400" >
+</div>
+
+
+## Estimating Value - Z-Score Approach
+
+Step 2: Compute value as sum of z-scores for each statistic 
+
+<div align = "center">
+ <img src = "z-scores-annot.png" height = "400" >
+</div>
+
+## Estimating Value - Z-Score Approach
+
+Step 3: Compute player value over replacement (VORP) for each position
+
+<div align = "center">
+ <img src = "z-scores-annot-2.png" height = "400" >
+</div>
+
+
+## Estimating Value - Z-Score Extension
+
+Step 4: Estimate uncertainty using bootstrapping approach
+
+<div align = "center">
+ <img src = "z-score-var.png" height = "500" >
+</div>
+
+
+
+## Source of Projections
+
+See an example of the data we want to pull [here](http://web.archive.org/web/20160315010651/http://www.fantasypros.com/mlb/projections/mike-trout.php)
+
+
+<div align = "center">
+ <img src = "trout-projections.png" height = "500">
+</div>
+
+
+## Figuring out Our URL Pattern
+
+- `http://www.fantasypros.com/mlb/projections/mike-trout.php`
+- `http://www.fantasypros.com/mlb/projections/bryce-harper.php`
+- **`http://www.fantasypros.com/mlb/projections/FIRSTNAME-LASTNAME.php`**
+
+
+## Getting first and last names for all players
+
+- Use [overall projections](http://www.fantasypros.com/mlb/rankings/overall.php) to obtain player names)
+
+```{r, eval=FALSE}
+u <- 'http://www.fantasypros.com/mlb/rankings/overall.php'
+fp_overall <- u %>% 
+  read_html() %>% 
+  html_nodes('.mobile-table .table') %>% 
+  html_table() %>% 
+  first
+```
+
+## Scraping All Projections {.smaller}
+
+```{r, eval=FALSE}
+# scrape all the available projections for each player
+proj <- lapply(1:nrow(fp_overall), function(i) {
+  parsed_name <- parse_name(fp_overall$player[i]) # https://github.com/hrbrmstr/humanparser
+  print(parsed_name$fullName)
+  tryCatch(
+    expr = {
+      sprintf('http://www.fantasypros.com/mlb/projections/%s-%s.php', 
+                   tolower(gsub("\\.|\\'", '', parsed_name$firstName)), 
+                   tolower(parsed_name$lastName)) %>% 
+        read_html() %>% 
+        html_nodes('.mobile-table .table') %>% 
+        html_table() %>% 
+        first
+    },
+    error = function(e) return(NULL)
+  )
+})
+```
+
+## The Final Product
+
+<div align = "center">
+ <img src = "app.gif" height = "500">
+</div>
+
+
+# Questions?
+
+

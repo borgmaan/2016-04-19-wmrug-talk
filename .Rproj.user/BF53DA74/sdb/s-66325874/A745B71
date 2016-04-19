@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "'http://web.archive.org/web/20160315010651/http://www.fantasypros.com/mlb/projections/mike-trout.php' %>% \n  read_html() %>% \n  html_nodes(xpath = '//*[@id=\"main\"]/div[3]/div[4]/table') %>% \n  html_table\n\n\n'http://web.archive.org/web/20160315010651/http://www.fantasypros.com/mlb/projections/mike-trout.php' %>% \n  read_html() %>% \n  html_nodes(css = '#main > div.main-content > div.mobile-table > table') %>% \n  html_table\n\n\nlibrary(rvest)\n\n# Store web url\nlego_movie <- read_html(\"http://www.imdb.com/title/tt1490017/\")\n\n#Scrape the website for the movie rating\nrating <- lego_movie %>% \n  html_nodes(\"strong span\") %>%\n  html_text() %>%\n  as.numeric()\nrating\n\n\ncast <- lego_movie %>%\n  html_nodes(\"#titleCast > table\") %>%\n  html_table()\ncast\n\n\n\n\n\n",
+    "created" : 1461031131806.000,
+    "dirty" : true,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "792804465",
+    "id" : "A745B71",
+    "lastKnownWriteTime" : 4294967302,
+    "last_content_update" : 1461035684500,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
