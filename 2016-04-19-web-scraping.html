@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Web Scraping in R withApplications to Fantasy Baseball</title>
+
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="chrome=1">
+  <meta name="generator" content="pandoc" />
+
+
+
+  <meta name="date" content="2016-04-19" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+
+  <link rel="stylesheet" media="all" href="2016-04-19-web-scraping_files/ioslides-13.5.1/fonts/fonts.css">
+
+  <link rel="stylesheet" media="all" href="2016-04-19-web-scraping_files/ioslides-13.5.1/theme/css/default.css">
+  <link rel="stylesheet" media="only screen and (max-device-width: 480px)" href="2016-04-19-web-scraping_files/ioslides-13.5.1/theme/css/phone.css">
+
+  <base target="_blank">
+
+  <script type="text/javascript">
+    var SLIDE_CONFIG = {
+      // Slide settings
+      settings: {
+                title: 'Web Scraping in R with<br/>Applications to Fantasy Baseball',
+                        useBuilds: true,
+        usePrettify: true,
+        enableSlideAreas: true,
+        enableTouch: true,
+              },
+
+      // Author information
+      presenters: [
+            {
+        name:  'Andrew Borgman' ,
+        company: '',
+        gplus: '',
+        twitter: '',
+        www: '',
+        github: ''
+      },
+            ]
+    };
+  </script>
+
+  <style type="text/css">
+
+    b, strong {
+      font-weight: bold;
+    }
+
+    em {
+      font-style: italic;
+    }
+
+    slides > slide {
+      -webkit-transition: all 0.2s ease-in-out;
+      -moz-transition: all 0.2s ease-in-out;
+      -o-transition: all 0.2s ease-in-out;
+      transition: all 0.2s ease-in-out;
+    }
+
+    .auto-fadein {
+      -webkit-transition: opacity 0.6s ease-in;
+      -webkit-transition-delay: 0.2s;
+      -moz-transition: opacity 0.6s ease-in 0.2s;
+      -o-transition: opacity 0.6s ease-in 0.2s;
+      transition: opacity 0.6s ease-in 0.2s;
+      opacity: 0;
+    }
+
+  </style>
+
+
+
+</head>
+
+<body style="opacity: 0">
+
+<slides class="layout-widescreen">
+
+  <slide class="title-slide segue nobackground">
+        <!-- The content of this hgroup is replaced programmatically through the slide_config.json. -->
+    <hgroup class="auto-fadein">
+      <h1 data-config-title><!-- populated from slide_config.json --></h1>
+      <h2 data-config-subtitle><!-- populated from slide_config.json --></h2>
+      <p data-config-presenter><!-- populated from slide_config.json --></p>
+            <p style="margin-top: 6px; margin-left: -2px;">April 19, 2016</p>
+          </hgroup>
+  </slide>
+
+<slide class=''><hgroup><h2>Overview</h2></hgroup><article  id="overview">
+
+<ul>
+<li>Why web scraping?</li>
+<li>Web scraping in <code>R</code></li>
+<li>Use case: Fantasy Baseball Analytics</li>
+</ul>
+
+</article></slide><slide class='segue dark nobackground'><hgroup class = 'auto-fadein'><h2>Why web scraping?</h2></hgroup><article  id="why-web-scraping">
+
+</article></slide><slide class=''><hgroup><h2>All starts with an idea&#8230;</h2></hgroup><article  id="all-starts-with-an-idea...">
+
+<div align="center">
+<p><img src = "idea.gif" width = "750" height = "500"></p></div>
+
+</article></slide><slide class=''><hgroup><h2>So you search for some data</h2></hgroup><article  id="so-you-search-for-some-data">
+
+<div align="center">
+<p><img src = "Data-search.jpg" width = "750" height = "500"></p></div>
+
+</article></slide><slide class=''><hgroup><h2>And you (almost) never find this&#8230;</h2></hgroup><article  id="and-you-almost-never-find-this...">
+
+<div align="center">
+<p><img src = "heaven.png" width = "750" height = "500"></p></div>
+
+</article></slide><slide class=''><hgroup><h2>If you&#39;re lucky&#8230;</h2></hgroup><article  id="if-youre-lucky...">
+
+<ul>
+<li>Someone has done the hard work for you</li>
+<li>Data is available in aggregated format (text file, DB, etc.)</li>
+<li>Or can be accessed via a standardized API</li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>But what if you aren&#39;t lucky?</h2></hgroup><article  id="but-what-if-you-arent-lucky">
+
+<div align="center">
+<p><img src = "web-scraping-services.png" width = "750" ></p></div>
+
+</article></slide><slide class='segue dark nobackground'><hgroup class = 'auto-fadein'><h2>Web scraping in <code>R</code></h2></hgroup><article  id="web-scraping-in-r">
+
+</article></slide><slide class=''><hgroup><h2>Many approaches, we&#39;ll use <code>rvest</code></h2></hgroup><article  id="many-approaches-well-use-rvest">
+
+<div align="center">
+<p><img src = "rvest.png" width = "750"></p></div>
+
+</article></slide><slide class=''><hgroup><h2>Dummy Example</h2></hgroup><article  id="dummy-example">
+
+<pre class = 'prettyprint lang-r'>library(rvest)
+
+# Store web url
+lego_movie &lt;- read_html(&quot;http://www.imdb.com/title/tt1490017/&quot;)
+
+#Scrape the website for the movie rating
+rating &lt;- lego_movie %&gt;% 
+  html_nodes(&quot;strong span&quot;) %&gt;%
+  html_text() %&gt;%
+  as.numeric()
+rating</pre>
+
+<pre >## [1] 7.8</pre>
+
+</article></slide><slide class=''><hgroup><h2>Chrome Developer Tools - Your New Best Friend</h2></hgroup><article  id="chrome-developer-tools---your-new-best-friend">
+
+<p>This is how to figure out what to put in <code>html_nodes</code>!</p>
+
+<div align="center">
+<p><img src = "selector.png" width = "750" ></p></div>
+
+</article></slide><slide class=''><hgroup><h2>Dummy Example - Continued</h2></hgroup><article  id="dummy-example---continued">
+
+<pre class = 'prettyprint lang-r'># Scrape the website for the cast
+cast &lt;- lego_movie %&gt;%
+  html_nodes(&quot;#titleCast &gt; table&quot;) %&gt;%
+  html_table()
+cast</pre>
+
+<pre >## [[1]]
+##                                   X1                                X2
+## 1  Cast overview, first billed only: Cast overview, first billed only:
+## 2                                                          Will Arnett
+## 3                                                      Elizabeth Banks
+## 4                                                          Craig Berry
+## 5                                                          Alison Brie
+## 6                                                        David Burrows
+## 7                                                      Anthony Daniels
+## 8                                                          Charlie Day
+## 9                                                       Amanda Farinos
+## 10                                                      Keith Ferguson
+## 11                                                        Will Ferrell
+## 12                                                          Will Forte
+## 13                                                         Dave Franco
+## 14                                                      Morgan Freeman
+## 15                                                         Todd Hansen
+## 16                                                          Jonah Hill
+##                                   X3
+## 1  Cast overview, first billed only:
+## 2                                ...
+## 3                                ...
+## 4                                ...
+## 5                                ...
+## 6                                ...
+## 7                                ...
+## 8                                ...
+## 9                                ...
+## 10                               ...
+## 11                               ...
+## 12                               ...
+## 13                               ...
+## 14                               ...
+## 15                               ...
+## 16                               ...
+##                                                                                                     X4
+## 1                                                                    Cast overview, first billed only:
+## 2                                              Batman /  \n            Bruce Wayne \n  \n  \n  (voice)
+## 3                                                  Wyldstyle /  \n            Lucy \n  \n  \n  (voice)
+## 4                                         Blake /  \n            Additional Voices \n  \n  \n  (voice)
+## 5                                                                         Unikitty \n  \n  \n  (voice)
+## 6                                   Octan Robot /  \n            Additional Voices \n  \n  \n  (voice)
+## 7                                                                            C-3PO \n  \n  \n  (voice)
+## 8                                                                            Benny \n  \n  \n  (voice)
+## 9                                                                              Mom \n  \n  \n  (voice)
+## 10                                                                        Han Solo \n  \n  \n  (voice)
+## 11 Lord Business (voice) /  \n            President Business (voice) /  \n            The Man Upstairs
+## 12                                              Abraham Lincoln \n  \n  \n  (voice) (as Orville Forte)
+## 13                                                                           Wally \n  \n  \n  (voice)
+## 14                                                                       Vitruvius \n  \n  \n  (voice)
+## 15                                      Gandalf /  \n            Additional Voices \n  \n  \n  (voice)
+## 16                                                                   Green Lantern \n  \n  \n  (voice)</pre>
+
+</article></slide><slide class='segue dark nobackground'><hgroup class = 'auto-fadein'><h2>Use case: Fantasy Baseball</h2></hgroup><article  id="use-case-fantasy-baseball">
+
+</article></slide><slide class=''><hgroup><h2>What is Fantasy Baseball?</h2></hgroup><article  id="what-is-fantasy-baseball">
+
+<ul>
+<li>10 teams draft 26 MLB players to create teams
+
+<ul>
+<li>each player can only be on 1 team</li>
+</ul></li>
+<li>teams compete against one another in head-to-head match-ups each week</li>
+<li>scores are determined based on players performances in different statistical categories during that week</li>
+</ul>
+
+<div align="center">
+<p><img src = "scores.png" width = "900" ></p></div>
+
+</article></slide><slide class=''><hgroup><h2>What is Fantasy Baseball?</h2></hgroup><article  id="what-is-fantasy-baseball-1">
+
+<ul>
+<li>10 teams draft 26 MLB players to create teams (player can only be on 1 team)</li>
+<li>teams compete against one another in head-to-head match-ups each week</li>
+<li>scores are determined based on players performances in different statistical categories during that week</li>
+</ul>
+
+<div align="center">
+<p><img src = "scores.png" width = "900" ></p></div>
+
+<p><font size="16" color="red">Question: How can we use <code>R</code> to help us win our league!?</font></p>
+
+</article></slide><slide class=''><hgroup><h2>Fantasy Baseball Analytics</h2></hgroup><article  id="fantasy-baseball-analytics">
+
+<ul>
+<li>With analytics, of course!</li>
+<li>Scrape multiple statistical projections for each player</li>
+<li><strong>Goal:</strong> Compute value for each player <em>while accounting for variability in projections</em></li>
+</ul>
+
+<div align="center">
+<p><img src = "raw-stats.png" height = "355" ></p></div>
+
+</article></slide><slide class=''><hgroup><h2>Estimating Value - Z-Score Approach</h2></hgroup><article  id="estimating-value---z-score-approach">
+
+<p>Step 1: Compute z-scores of statistics for all players</p>
+
+<div align="center">
+<p><img src = "z-scores.png" height = "400" ></p></div>
+
+</article></slide><slide class=''><hgroup><h2>Estimating Value - Z-Score Approach</h2></hgroup><article  id="estimating-value---z-score-approach-1">
+
+<p>Step 2: Compute value as sum of z-scores for each statistic</p>
+
+<div align="center">
+<p><img src = "z-scores-annot.png" height = "400" ></p></div>
+
+</article></slide><slide class=''><hgroup><h2>Estimating Value - Z-Score Approach</h2></hgroup><article  id="estimating-value---z-score-approach-2">
+
+<p>Step 3: Compute player value over replacement (VORP) for each position</p>
+
+<div align="center">
+<p><img src = "z-scores-annot-2.png" height = "400" ></p></div>
+
+</article></slide><slide class=''><hgroup><h2>Estimating Value - Z-Score Extension</h2></hgroup><article  id="estimating-value---z-score-extension">
+
+<p>Step 4: Estimate uncertainty using bootstrapping approach</p>
+
+<div align="center">
+<p><img src = "z-score-var.png" height = "500" ></p></div>
+
+</article></slide><slide class=''><hgroup><h2>Source of Projections</h2></hgroup><article  id="source-of-projections">
+
+<p>See an example of the data we want to pull <a href='http://web.archive.org/web/20160315010651/http://www.fantasypros.com/mlb/projections/mike-trout.php' title=''>here</a></p>
+
+<div align="center">
+<p><img src = "trout-projections.png" height = "500"></p></div>
+
+</article></slide><slide class=''><hgroup><h2>Figuring out Our URL Pattern</h2></hgroup><article  id="figuring-out-our-url-pattern">
+
+<ul>
+<li><code>http://www.fantasypros.com/mlb/projections/mike-trout.php</code></li>
+<li><code>http://www.fantasypros.com/mlb/projections/bryce-harper.php</code></li>
+<li><strong><code>http://www.fantasypros.com/mlb/projections/FIRSTNAME-LASTNAME.php</code></strong></li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Getting first and last names for all players</h2></hgroup><article  id="getting-first-and-last-names-for-all-players">
+
+<ul>
+<li>Use <a href='http://www.fantasypros.com/mlb/rankings/overall.php' title=''>overall projections</a> to obtain player names)</li>
+</ul>
+
+<pre class = 'prettyprint lang-r'>u &lt;- &#39;http://www.fantasypros.com/mlb/rankings/overall.php&#39;
+fp_overall &lt;- u %&gt;% 
+  read_html() %&gt;% 
+  html_nodes(&#39;.mobile-table .table&#39;) %&gt;% 
+  html_table() %&gt;% 
+  first</pre>
+
+</article></slide><slide class=''><hgroup><h2>Scraping All Projections</h2></hgroup><article  id="scraping-all-projections" class="smaller">
+
+<pre class = 'prettyprint lang-r'># scrape all the available projections for each player
+proj &lt;- lapply(1:nrow(fp_overall), function(i) {
+  parsed_name &lt;- parse_name(fp_overall$player[i]) # https://github.com/hrbrmstr/humanparser
+  print(parsed_name$fullName)
+  tryCatch(
+    expr = {
+      sprintf(&#39;http://www.fantasypros.com/mlb/projections/%s-%s.php&#39;, 
+                   tolower(gsub(&quot;\\.|\\&#39;&quot;, &#39;&#39;, parsed_name$firstName)), 
+                   tolower(parsed_name$lastName)) %&gt;% 
+        read_html() %&gt;% 
+        html_nodes(&#39;.mobile-table .table&#39;) %&gt;% 
+        html_table() %&gt;% 
+        first
+    },
+    error = function(e) return(NULL)
+  )
+})</pre>
+
+</article></slide><slide class=''><hgroup><h2>The Final Product</h2></hgroup><article  id="the-final-product">
+
+<div align="center">
+<p><img src = "app.gif" height = "500"></p></div>
+
+</article></slide><slide class='segue dark nobackground'><hgroup class = 'auto-fadein'><h2>Questions</h2></hgroup><article  id="questions"></article></slide>
+
+
+  <slide class="backdrop"></slide>
+
+</slides>
+
+<script src="2016-04-19-web-scraping_files/ioslides-13.5.1/js/modernizr.custom.45394.js"></script>
+<script src="2016-04-19-web-scraping_files/ioslides-13.5.1/js/prettify/prettify.js"></script>
+<script src="2016-04-19-web-scraping_files/ioslides-13.5.1/js/prettify/lang-r.js"></script>
+<script src="2016-04-19-web-scraping_files/ioslides-13.5.1/js/prettify/lang-yaml.js"></script>
+<script src="2016-04-19-web-scraping_files/ioslides-13.5.1/js/hammer.js"></script>
+<script src="2016-04-19-web-scraping_files/ioslides-13.5.1/js/slide-controller.js"></script>
+<script src="2016-04-19-web-scraping_files/ioslides-13.5.1/js/slide-deck.js"></script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+<!-- map slide visiblity events into shiny -->
+<script>
+  (function() {
+    if (window.jQuery) {
+       window.jQuery(document).on('slideleave', function(e) {
+         window.jQuery(e.target).trigger('hidden');
+      });
+       window.jQuery(document).on('slideenter', function(e) {
+         window.jQuery(e.target).trigger('shown');
+      });
+    }
+  })();
+</script>
+
+</body>
+</html>
